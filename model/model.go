@@ -6,8 +6,9 @@ type Book struct {
 	Penulis  string `json:"penulis" gorm:"size:50"`
 	Penerbit string `json:"penerbit" gorm:"size:50"`
 	Tahun    int    `json:"tahun"`
-	Isbn     string `json:"isbn" gorm:"size:16"`
+	Isbn     string `json:"isbn" gorm:"size:16;unique"`
 	IdJenis  int    `json:"id_jenis"`
+	File     string `json:"file" gorm:"size:100"`
 }
 
 type Jenis struct {
