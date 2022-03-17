@@ -12,12 +12,12 @@ func ResponseHTTP(c *fiber.Ctx, responseCode int, err error, data interface{}) e
 			"data":  data,
 		})
 	} else {
-		return errors(c, responseCode, err)
+		return eror(c, responseCode, err)
 	}
 
 }
 
-func errors(c *fiber.Ctx, responseCode int, err error) error {
+func eror(c *fiber.Ctx, responseCode int, err error) error {
 	log := logrus.WithFields(logrus.Fields{
 		"Method": c.Method(),
 		"Host":   c.Hostname(),

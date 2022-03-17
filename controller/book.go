@@ -4,6 +4,7 @@ import (
 	"api-perpus/database"
 	"api-perpus/model"
 	"api-perpus/util"
+	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 	"gorm.io/gorm"
@@ -38,6 +39,17 @@ func SaveBook(db *gorm.DB) func(ctx *fiber.Ctx) error {
 		if err := ctx.BodyParser(&book); err != nil {
 			return util.ResponseHTTP(ctx, fiber.StatusBadRequest, err, nil)
 		}
+
+		//upload file
+		fileName := fmt.Sprintf("%s_%s.pdf", book.Judul, book.Isbn)
+		fileDecode64, err := util.Base64Decode(book.File)
+		if err != nil {
+			return util.ResponseHTTP(ctx, fiber.StatusInternalServerError, err, nil)
+		}
+		if err := util.WriteFileBase64("files", fileName, fileDecode64); err != nil {
+			return util.ResponseHTTP(ctx, fiber.StatusInternalServerError, err, nil)
+		}
+		book.File = fileName
 
 		if err := database.SaveData(db, &book); err != nil {
 			return util.ResponseHTTP(ctx, fiber.StatusInternalServerError, err, nil)
