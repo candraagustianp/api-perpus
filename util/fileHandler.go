@@ -19,6 +19,12 @@ func Base64Decode(file string) ([]byte, error) {
 	return decode64Byte, nil
 }
 
+func IsBase64(s string) bool {
+	s = s[strings.IndexByte(s, ',')+1:]
+	_, err := base64.StdEncoding.DecodeString(s)
+	return err == nil
+}
+
 func WriteFileBase64(folderName string, fileName string, base64File []byte) error {
 	if _, err := os.Stat(folderName); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
@@ -46,6 +52,14 @@ func WriteFileBase64(folderName string, fileName string, base64File []byte) erro
 
 func RemoveFile(folderName string, fileName string) error {
 	e := os.Remove(fmt.Sprintf("%s/%s", folderName, fileName))
+	if e != nil {
+		return e
+	}
+	return nil
+}
+
+func Rename(folderName string, oldFileName string, newFileName string) error {
+	e := os.Rename(fmt.Sprintf("%s/%s", folderName, oldFileName), fmt.Sprintf("%s/%s", folderName, newFileName))
 	if e != nil {
 		return e
 	}

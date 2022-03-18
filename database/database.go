@@ -70,7 +70,7 @@ func SaveData(db *gorm.DB, value interface{}) error {
 
 func UpdateData(db *gorm.DB, condition string, value interface{}) error {
 	if result := db.Where(condition).Updates(value); result.Error != nil || result.RowsAffected < 1 {
-		return errors.New("failed update data: " + result.Error.Error())
+		return result.Error
 	} else {
 		return nil
 	}
@@ -78,7 +78,7 @@ func UpdateData(db *gorm.DB, condition string, value interface{}) error {
 
 func DeleteData(db *gorm.DB, value interface{}, primary interface{}) error {
 	if result := db.Delete(value, primary); result.Error != nil || result.RowsAffected < 1 {
-		return errors.New("failed delete data: " + result.Error.Error())
+		return result.Error
 	} else {
 		return nil
 	}

@@ -19,7 +19,7 @@ func PublicRouting(router fiber.Router, db *gorm.DB) {
 
 	router.Post("/book", controller.SaveBook(db))
 
-	router.Post("/book/:id", controller.UpdateBook(db))
+	router.Put("/book/:id", controller.UpdateBook(db))
 
 	router.Delete("/book/:id", controller.DeleteBook(db))
 

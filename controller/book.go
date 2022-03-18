@@ -61,17 +61,46 @@ func SaveBook(db *gorm.DB) func(ctx *fiber.Ctx) error {
 
 func UpdateBook(db *gorm.DB) func(ctx *fiber.Ctx) error {
 	return func(ctx *fiber.Ctx) error {
-		book := model.Book{}
+		newBook := model.Book{}
+		oldBook := model.Book{}
 
-		if err := ctx.BodyParser(&book); err != nil {
+		if err := ctx.BodyParser(&newBook); err != nil {
 			return util.ResponseHTTP(ctx, fiber.StatusBadRequest, err, nil)
 		}
-
-		if err := database.UpdateData(db, "id = "+ctx.Params("id"), &book); err != nil {
+		if err := database.GetWhere(db, &oldBook, "id = "+ctx.Params("id")); err != nil {
 			return util.ResponseHTTP(ctx, fiber.StatusInternalServerError, err, nil)
 		}
 
-		return util.ResponseHTTP(ctx, fiber.StatusOK, nil, book)
+		fileName := fmt.Sprintf("%s_%s.pdf", newBook.Isbn, newBook.Judul)
+
+		if util.IsBase64(newBook.File) {
+			if e := util.RemoveFile("files", oldBook.File); e != nil {
+				return util.ResponseHTTP(ctx, fiber.StatusInternalServerError, e, nil)
+			}
+
+			fileDecode64, err := util.Base64Decode(newBook.File)
+			if err != nil {
+				return util.ResponseHTTP(ctx, fiber.StatusInternalServerError, err, nil)
+			}
+			if err := util.WriteFileBase64("files", fileName, fileDecode64); err != nil {
+				return util.ResponseHTTP(ctx, fiber.StatusInternalServerError, err, nil)
+			}
+
+		}
+
+		if fileName != oldBook.File {
+			if e := util.Rename("files", oldBook.File, fileName); e != nil {
+				return util.ResponseHTTP(ctx, fiber.StatusInternalServerError, e, nil)
+			}
+		}
+
+		newBook.File = fileName
+
+		if err := database.UpdateData(db, "id = "+ctx.Params("id"), &newBook); err != nil {
+			return util.ResponseHTTP(ctx, fiber.StatusInternalServerError, err, nil)
+		}
+
+		return util.ResponseHTTP(ctx, fiber.StatusOK, nil, newBook)
 	}
 }
 
