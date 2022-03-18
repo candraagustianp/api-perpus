@@ -41,7 +41,7 @@ func SaveBook(db *gorm.DB) func(ctx *fiber.Ctx) error {
 		}
 
 		//upload file
-		fileName := fmt.Sprintf("%s_%s.pdf", book.Judul, book.Isbn)
+		fileName := fmt.Sprintf("%s_%s.pdf", book.Isbn, book.Judul)
 		fileDecode64, err := util.Base64Decode(book.File)
 		if err != nil {
 			return util.ResponseHTTP(ctx, fiber.StatusInternalServerError, err, nil)
@@ -77,8 +77,16 @@ func UpdateBook(db *gorm.DB) func(ctx *fiber.Ctx) error {
 
 func DeleteBook(db *gorm.DB) func(ctx *fiber.Ctx) error {
 	return func(ctx *fiber.Ctx) error {
+		book := model.Book{}
 
-		if err := database.DeleteData(db, &model.Book{}, ctx.Params("id")); err != nil {
+		if err := database.GetWhere(db, &book, "id = "+ctx.Params("id")); err != nil {
+			return util.ResponseHTTP(ctx, fiber.StatusNotFound, err, nil)
+		}
+		if e := util.RemoveFile("files", book.File); e != nil {
+			return util.ResponseHTTP(ctx, fiber.StatusInternalServerError, e, nil)
+		}
+
+		if err := database.DeleteData(db, &book, ctx.Params("id")); err != nil {
 			return util.ResponseHTTP(ctx, fiber.StatusInternalServerError, err, nil)
 		}
 

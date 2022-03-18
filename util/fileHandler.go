@@ -43,3 +43,11 @@ func WriteFileBase64(folderName string, fileName string, base64File []byte) erro
 	}
 	return nil
 }
+
+func RemoveFile(folderName string, fileName string) error {
+	e := os.Remove(fmt.Sprintf("%s/%s", folderName, fileName))
+	if e != nil {
+		return e
+	}
+	return nil
+}
