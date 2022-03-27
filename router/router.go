@@ -23,4 +23,6 @@ func PublicRouting(router fiber.Router, db *gorm.DB) {
 
 	router.Delete("/book/:id", controller.DeleteBook(db))
 
+	router.Static("/file", "./files")
+
 }
